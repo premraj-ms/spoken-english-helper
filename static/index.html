@@ -1091,6 +1091,16 @@
         }
 
         function handleCallTutorResponse(data) {
+            if (!data || !data.tutor_feedback) {
+                isProcessingAudio = false;
+                const statusBadge = document.getElementById('statusBadge');
+                if (statusBadge) {
+                    statusBadge.innerText = "🟢 Elena is listening... Speak anytime!";
+                    statusBadge.style.color = "var(--emerald)";
+                }
+                return;
+            }
+
             const preview = document.getElementById('liveSpeechPreview');
             const previewText = document.getElementById('liveSpeechText');
             if (data.user_text) {
@@ -1100,7 +1110,7 @@
             }
 
             const feedback = data.tutor_feedback;
-            const spoken = feedback.spoken_response;
+            const spoken = feedback.spoken_response || "Let's keep practicing!";
             appendMessage("tutor", spoken, false, feedback);
             updateFeedbackSidebar(feedback);
 

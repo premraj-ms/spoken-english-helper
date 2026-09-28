@@ -13,49 +13,92 @@ def get_whisper_model(model_name: str = "base.en"):
     global _whisper_model
     if _whisper_model is None:
         from faster_whisper import WhisperModel
-        import torch
         
-        has_cuda = torch.cuda.is_available()
+        has_cuda = False
+        try:
+            import torch
+            has_cuda = torch.cuda.is_available()
+        except Exception:
+            has_cuda = False
+
         device = "cuda" if has_cuda else "cpu"
         compute_type = "float16" if has_cuda else "int8"
         print(f"[STT] Loading faster-whisper ({model_name}) on device={device} ({compute_type})...")
         _whisper_model = WhisperModel(model_name, device=device, compute_type=compute_type, num_workers=1)
-        print("[STT] Faster-whisper ready on", device)
+        print(f"[STT] Faster-whisper ready on {device}.")
     return _whisper_model
 
 def transcribe_audio_file(audio_path_or_bytes) -> str:
-    """Transcribes an audio file or bytes to text with minimal CPU overhead."""
-    model = get_whisper_model()
+    """Transcribes an audio file or bytes to text with minimal CPU/GPU overhead."""
+    try:
+        model = get_whisper_model()
+    except Exception as e:
+        print(f"[STT Error] Model load failed: {e}")
+        return ""
     
     if isinstance(audio_path_or_bytes, bytes):
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        if len(audio_path_or_bytes) < 32:
+            return ""
+
+        # Detect file extension signature
+        suffix = ".webm"
+        if audio_path_or_bytes.startswith(b"RIFF"):
+            suffix = ".wav"
+        elif audio_path_or_bytes.startswith(b"OggS"):
+            suffix = ".ogg"
+        elif audio_path_or_bytes.startswith(b"\x1a\x45\xdf\xa3"):
+            suffix = ".webm"
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(audio_path_or_bytes)
             tmp_path = tmp.name
         try:
+            text = ""
+            try:
+                segments, _ = model.transcribe(
+                    tmp_path,
+                    beam_size=1,
+                    best_of=1,
+                    temperature=0.0,
+                    vad_filter=True,
+                    vad_parameters=dict(min_silence_duration_ms=300)
+                )
+                text = " ".join([segment.text for segment in segments]).strip()
+            except Exception:
+                pass
+            
+            # Fallback without VAD if speech was very short
+            if not text:
+                try:
+                    segments, _ = model.transcribe(
+                        tmp_path,
+                        beam_size=1,
+                        best_of=1,
+                        temperature=0.0,
+                        vad_filter=False
+                    )
+                    text = " ".join([segment.text for segment in segments]).strip()
+                except Exception as e:
+                    print(f"[STT Error] Audio decode error: {e}")
+                    text = ""
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        return text
+    else:
+        try:
             segments, _ = model.transcribe(
-                tmp_path,
+                audio_path_or_bytes,
                 beam_size=1,
                 best_of=1,
                 temperature=0.0,
                 vad_filter=True,
-                vad_parameters=dict(min_silence_duration_ms=400)
+                vad_parameters=dict(min_silence_duration_ms=300)
             )
-            text = " ".join([segment.text for segment in segments]).strip()
-        finally:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
-    else:
-        segments, _ = model.transcribe(
-            audio_path_or_bytes,
-            beam_size=1,
-            best_of=1,
-            temperature=0.0,
-            vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=400)
-        )
-        text = " ".join([segment.text for segment in segments]).strip()
-
-    return text
+            return " ".join([segment.text for segment in segments]).strip()
+        except Exception as e:
+            print(f"[STT Error] File transcribe error: {e}")
+            return ""
 
 # TTS: Kokoro ONNX
 _kokoro_pipeline = None

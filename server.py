@@ -65,17 +65,34 @@ async def chat_audio(
         raise HTTPException(status_code=400, detail="No audio received")
 
     # 2. STT via faster-whisper (base.en)
+    user_transcript = ""
     try:
         user_transcript = transcribe_audio_file(audio_content)
     except Exception as e:
         print(f"[STT Error] {e}")
         user_transcript = ""
 
-    if not user_transcript.strip():
-        return JSONResponse(
-            status_code=400,
-            content={"detail": "Could not understand audio. Please try speaking clearly."}
-        )
+    # If audio is silence/unclear, respond politely without crashing the UI
+    if not user_transcript or not user_transcript.strip():
+        fallback_msg = "I didn't quite catch that. Could you please speak a little closer to the mic or repeat what you said?"
+        return {
+            "user_text": "(unclear speech)",
+            "tutor_feedback": {
+                "spoken_response": fallback_msg,
+                "improvement_points": [
+                    "Speak clearly into the microphone",
+                    "Keep a steady conversational volume"
+                ],
+                "has_correction": False,
+                "original_mistake": None,
+                "corrected_version": None,
+                "correction_explanation": None,
+                "better_phrasing": None,
+                "new_vocabulary": None,
+                "fluency_tip": "Speak slowly and clearly — no rush!"
+            },
+            "has_audio": True
+        }
 
     # 3. AI Tutor via Ollama
     result = tutor.chat(user_input=user_transcript, topic=topic)
