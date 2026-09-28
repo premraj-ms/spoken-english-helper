@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elena - AI Spoken English Coach & Communication Tutor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-card: rgba(18, 24, 38, 0.7);
+            --bg-card-hover: rgba(28, 38, 58, 0.8);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(99, 102, 241, 0.3);
+            --primary: #6366f1;
+            --primary-glow: #818cf8;
+            --accent: #06b6d4;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font);
+            background-color: var(--bg-primary);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+        }
+
+        /* App Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 28px;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            background: rgba(11, 15, 25, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+            position: relative;
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            background: var(--emerald);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-call {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-call:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
+        }
+
+        .btn-call.in-call {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+            animation: pulse-mic 1.5s infinite;
+        }
+
+        .select-input, .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .select-input:hover, .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--border-glow);
+        }
+
+        /* Layout Grid */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            padding: 24px 28px;
+            flex: 1;
+            max-width: 1500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Chat & Voice Section */
+        .chat-section {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+            height: calc(100vh - 130px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .topic-bar {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .topic-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--primary-glow);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            scroll-behavior: smooth;
+        }
+
+        .msg {
+            display: flex;
+            gap: 12px;
+            max-width: 82%;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .msg.tutor {
+            align-self: flex-start;
+        }
+
+        .msg-bubble {
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 14.5px;
+            line-height: 1.55;
+            position: relative;
+        }
+
+        .msg.user .msg-bubble {
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .msg.tutor .msg-bubble {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-audio-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            transition: all 0.2s;
+        }
+
+        .msg-audio-btn:hover {
+            background: var(--accent);
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        /* Voice Interaction Bar */
+        .voice-control-panel {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: rgba(11, 15, 25, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .visualizer-canvas {
+            width: 100%;
+            height: 48px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+        }
+
+        .voice-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 16px;
+        }
+
+        .text-input-wrap {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 12px 48px 12px 16px;
+            border-radius: 30px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .send-text-btn {
+            position: absolute;
+            right: 8px;
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .send-text-btn:hover {
+            transform: scale(1.05);
+            background: var(--primary-glow);
+        }
+
+        /* Glow Mic Button */
+        .mic-btn-main {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            border: none;
+            color: #fff;
+            font-size: 26px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .mic-btn-main:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 35px rgba(99, 102, 241, 0.8);
+        }
+
+        .mic-btn-main.recording {
+            background: linear-gradient(135deg, #ef4444, #f43f5e);
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.8);
+            animation: pulse-mic 1.2s infinite;
+        }
+
+        @keyframes pulse-mic {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+            50% { transform: scale(1.12); box-shadow: 0 0 45px rgba(239, 68, 68, 0.9); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+        }
+
+        .status-badge {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Coach Feedback Panel (Right Side) */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: calc(100vh - 130px);
+            overflow-y: auto;
+        }
+
+        .feedback-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .feedback-card.highlight {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recast-box {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .recast-bad {
+            color: var(--rose);
+            font-size: 13px;
+            text-decoration: line-through;
+            margin-bottom: 4px;
+        }
+
+        .recast-good {
+            color: var(--emerald);
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .recast-exp {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .phrasing-box {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            font-size: 13px;
+            color: #e0f2fe;
+        }
+
+        .vocab-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-top: 8px;
+        }
+
+        .vocab-word {
+            font-weight: 700;
+            color: var(--amber);
+            font-size: 15px;
+        }
+
+        .vocab-def {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 4px 0;
+        }
+
+        .vocab-ex {
+            font-size: 12px;
+            font-style: italic;
+            color: #cbd5e1;
+        }
+
+        /* Modal Drawer */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #121826;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="avatar">
+                🎙️
+                <div class="online-dot"></div>
+            </div>
+            <div class="brand-text">
+                <h1>Elena &bull; Spoken English Coach</h1>
+                <p>Ollama + Kokoro TTS + Whisper STT</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button id="callBtn" class="btn-call" onclick="toggleCallMode()">
+                <span class="call-icon">📞</span>
+                <span id="callBtnText">Start 1-on-1 Call</span>
+            </button>
+            <select id="modelSelect" class="select-input" title="Ollama Model" onchange="onModelChange()">
+                <option value="gpt-oss:120b-cloud" selected>gpt-oss:120b-cloud</option>
+            </select>
+            <select id="voiceSelect" class="select-input" title="Kokoro Voice">
+                <option value="af_bella">Voice: Bella (US)</option>
+                <option value="af_sarah">Voice: Sarah (US)</option>
+                <option value="am_adam">Voice: Adam (US Male)</option>
+                <option value="bf_emma">Voice: Emma (UK)</option>
+            </select>
+            <button class="btn-secondary" style="background:linear-gradient(135deg, rgba(99,102,241,0.25), rgba(6,182,212,0.25)); border-color:var(--primary-glow); font-weight:700;" onclick="openReportModal()">
+                📊 End & PDF Report
+            </button>
+            <button class="btn-secondary" onclick="openMemoryModal()">🧠 Memory & Profile</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Main Chat & Voice Center -->
+        <div class="chat-section">
+            <div class="topic-bar">
+                <div class="topic-pill">
+                    <span>🎯 Scenario:</span>
+                    <select id="topicSelector" style="background:transparent; border:none; color:inherit; font-family:inherit; font-weight:600; outline:none; cursor:pointer;" onchange="onTopicChange()">
+                        <option value="Casual Daily Conversation">Casual Social Chat</option>
+                        <option value="Job Interview Practice (Software & Tech)">Job Interview Practice</option>
+                        <option value="Business Meeting & Debates">Business Meeting & Debates</option>
+                        <option value="Travel, Ordering Food & Airport">Travel & Ordering Food</option>
+                        <option value="IELTS / TOEFL Speaking Test Part 2">IELTS Speaking Practice</option>
+                    </select>
+                </div>
+                <div id="statusBadge" class="status-badge">Ready to speak</div>
+            </div>
+
+            <!-- Call Mode Active Banner -->
+            <div id="callBanner" style="display:none; background:linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(99, 102, 241, 0.15)); padding:10px 20px; border-bottom:1px solid rgba(16, 185, 129, 0.3); align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="live-dot" style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981; animation:pulse-mic 1s infinite;"></span>
+                    <span style="font-size:13px; font-weight:600; color:#6ee7b7;">1-on-1 Call Active (Speak naturally, Elena will auto-reply)</span>
+                </div>
+                <button onclick="toggleCallMode()" style="background:rgba(244,63,94,0.2); border:1px solid #f43f5e; color:#fda4af; padding:4px 10px; border-radius:12px; font-size:12px; cursor:pointer;">End Call</button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="messagesContainer" class="messages-container">
+                <div class="msg tutor">
+                    <div class="msg-bubble">
+                        Hello there! I'm Elena, your personal spoken English coach. 😊<br>
+                        Tap the microphone below and tell me: <strong>How has your day been going so far?</strong>
+                        <button class="msg-audio-btn" onclick="playAudio('Hello there! I am Elena, your personal spoken English coach. Tap the microphone below and tell me: How has your day been going so far?')">🔊</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Control Panel -->
+            <div class="voice-control-panel">
+                <canvas id="visualizerCanvas" class="visualizer-canvas"></canvas>
+
+                <!-- Live Extracted Speech Preview Bar -->
+                <div id="liveSpeechPreview" style="display:none; width:100%; padding:8px 16px; background:rgba(99,102,241,0.15); border:1px solid rgba(99,102,241,0.3); border-radius:12px; font-size:13px; color:#e0e7ff; align-items:center; gap:8px; animation:fadeIn 0.3s ease;">
+                    <span style="color:var(--accent); font-weight:700;">🎙️ Extracted Voice:</span>
+                    <span id="liveSpeechText" style="font-weight:600; color:#fff;"></span>
+                </div>
+
+                <div class="voice-actions">
+                    <div class="text-input-wrap">
+                        <input id="textInput" class="chat-input" placeholder="Type or click the microphone to speak..." onkeydown="if(event.key==='Enter') sendTextMessage()">
+                        <button class="send-text-btn" onclick="sendTextMessage()">➤</button>
+                    </div>
+
+                    <button id="micBtn" class="mic-btn-main" onclick="toggleRecording()" title="Click to start/stop speaking">
+                        🎤
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coach Feedback Sidebar -->
+        <div class="sidebar">
+            <!-- Realtime Coach Corrections Card -->
+            <div id="feedbackCard" class="feedback-card">
+                <div class="card-title">✨ Elena's Live Feedback</div>
+                
+                <!-- Actionable Improvement Points Section -->
+                <div id="improvementPointsSection" style="display:none; margin-bottom:14px;">
+                    <div class="card-title" style="color:var(--emerald);">📈 Key Improvement Points</div>
+                    <div id="improvementPointsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+
+                <div id="recastSection" style="display:none;">
+                    <div class="recast-box">
+                        <div class="recast-bad" id="recastOriginal">"I go to market yesterday"</div>
+                        <div class="recast-good" id="recastCorrected">✓ "I went to the market yesterday"</div>
+                        <div class="recast-exp" id="recastExp">Use past tense 'went' for past actions.</div>
+                    </div>
+                </div>
+
+                <div id="phrasingSection" style="display:none; margin-bottom:12px;">
+                    <div class="card-title" style="color:var(--accent);">💡 Sound More Natural</div>
+                    <div class="phrasing-box" id="phrasingContent"></div>
+                </div>
+
+                <div id="vocabSection" style="display:none;">
+                    <div class="card-title" style="color:var(--amber);">📖 Vocabulary & Idiom</div>
+                    <div class="vocab-item">
+                        <div class="vocab-word" id="vocabWord">Serendipity</div>
+                        <div class="vocab-def" id="vocabDef">Finding good things without looking for them.</div>
+                        <div class="vocab-ex" id="vocabEx">"Meeting an old friend in London was pure serendipity."</div>
+                    </div>
+                </div>
+
+                <div id="fluencyTipSection" style="margin-top:12px; display:none;">
+                    <div class="card-title" style="color:var(--emerald);">🎯 Spoken Fluency Tip</div>
+                    <div style="font-size:13px; color:#cbd5e1;" id="fluencyTipText"></div>
+                </div>
+
+                <div id="emptyFeedbackState" style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px 0;">
+                    Start speaking to receive live grammar recasting, natural phrasing tips, and spoken suggestions!
+                </div>
+            </div>
+
+            <!-- Mistakes Under Review Card on Main Page -->
+            <div class="feedback-card" style="border-color: rgba(244, 63, 94, 0.25);">
+                <div class="card-title" style="color:var(--rose); justify-content:space-between;">
+                    <span>⚠️ Mistakes Under Review</span>
+                    <span id="mistakeCountBadge" style="background:rgba(244,63,94,0.2); color:#fda4af; font-size:11px; padding:2px 8px; border-radius:10px;">0 tracked</span>
+                </div>
+                <div id="mainMistakesList" style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto; font-size:12.5px;">
+                    <div style="color:var(--text-muted); text-align:center; padding:12px 0;">No mistakes recorded yet. Keep speaking!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory Modal -->
+    <div id="memoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🧠 Student Memory & Profile</h2>
+                <button class="close-btn" onclick="closeMemoryModal()">&times;</button>
+            </div>
+            <form onsubmit="saveProfile(event)">
+                <div class="form-group">
+                    <label>Proficiency Level</label>
+                    <select id="profLevel" class="form-control">
+                        <option value="Beginner (A1-A2)">Beginner (A1-A2)</option>
+                        <option value="Intermediate (B1-B2)" selected>Intermediate (B1-B2)</option>
+                        <option value="Advanced (C1-C2)">Advanced (C1-C2)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Learning Goals</label>
+                    <input id="learningGoal" class="form-control" value="Conversational fluency, natural idioms, and business confidence">
+                </div>
+                <div class="form-group">
+                    <label>Personal Interests</label>
+                    <input id="interests" class="form-control" value="AI, Coding, Travel, Cinema">
+                </div>
+                <button type="submit" class="btn-primary">Save Profile</button>
+            </form>
+
+            <h3 style="margin: 20px 0 10px 0; font-size:15px; color:var(--accent);">📚 Tracked Vocabulary Bank</h3>
+            <div id="memoryVocabList" style="max-height:150px; overflow-y:auto; font-size:13px;"></div>
+
+            <h3 style="margin: 20px 0 10px 0; font-size:15px; color:var(--rose);">⚠️ Past Mistakes Under Review</h3>
+            <div id="memoryMistakesList" style="max-height:150px; overflow-y:auto; font-size:13px;"></div>
+        </div>
+    </div>
+
+    <!-- 📊 Session Evaluation & PDF Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content" style="max-width: 750px; width: 95%;">
+            <div class="modal-header">
+                <div>
+                    <h2 style="font-size:20px; display:flex; align-items:center; gap:8px;">📊 End of Session Performance Report</h2>
+                    <p style="color:var(--text-muted); font-size:12px; margin-top:2px;">Detailed linguistic evaluation, score breakdown, and learning guide</p>
+                </div>
+                <button class="close-btn" onclick="closeReportModal()">&times;</button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="reportLoading" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 0; gap:12px;">
+                <div class="live-dot" style="width:20px; height:20px; border-radius:50%; background:var(--primary); animation:pulse-mic 1s infinite;"></div>
+                <p style="color:var(--accent); font-weight:600;">Analyzing your session transcript with AI Evaluator...</p>
+            </div>
+
+            <!-- Report Content Body -->
+            <div id="reportBody" style="display:none; flex-direction:column; gap:16px;">
+                <!-- Overall Score Gauge -->
+                <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <div style="background:linear-gradient(135deg, #6366f1, #06b6d4); width:64px; height:64px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:22px; box-shadow:0 0 20px rgba(99,102,241,0.5);">
+                            <span id="reportScore">--</span>
+                        </div>
+                        <div>
+                            <div style="font-size:16px; font-weight:700;" id="reportCefr">B2 (Upper Intermediate)</div>
+                            <div style="font-size:12px; color:var(--text-muted);">Overall CEFR Speaking Benchmark</div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" style="width:auto; padding:10px 18px; display:flex; align-items:center; gap:8px;" onclick="downloadReportPDF()">
+                        📥 Download Official PDF
+                    </button>
+                </div>
+
+                <!-- Metric Scores Grid -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+                        <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Grammar</div>
+                        <div style="font-size:18px; font-weight:700; color:#818cf8;" id="reportGrammar">--%</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+                        <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Vocabulary</div>
+                        <div style="font-size:18px; font-weight:700; color:#38bdf8;" id="reportVocab">--%</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+                        <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Fluency</div>
+                        <div style="font-size:18px; font-weight:700; color:#34d399;" id="reportFluency">--%</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+                        <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Clarity</div>
+                        <div style="font-size:18px; font-weight:700; color:#fbbf24;" id="reportClarity">--%</div>
+                    </div>
+                </div>
+
+                <!-- Executive Summary -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:12px; font-size:13px; line-height:1.5; color:#cbd5e1;" id="reportSummary">
+                </div>
+
+                <!-- Strengths & Growth Areas -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:10px; padding:12px;">
+                        <div style="font-size:13px; font-weight:700; color:#6ee7b7; margin-bottom:6px;">✅ Key Strengths</div>
+                        <ul id="reportStrengthsList" style="font-size:12px; color:#e2e8f0; padding-left:16px; margin:0; line-height:1.4;"></ul>
+                    </div>
+                    <div style="background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.25); border-radius:10px; padding:12px;">
+                        <div style="font-size:13px; font-weight:700; color:#a5b4fc; margin-bottom:6px;">🎯 Priority Growth Areas</div>
+                        <ul id="reportImprovementsList" style="font-size:12px; color:#e2e8f0; padding-left:16px; margin:0; line-height:1.4;"></ul>
+                    </div>
+                </div>
+
+                <!-- Sentence-by-Sentence Corrections List -->
+                <div>
+                    <h3 style="font-size:14px; font-weight:700; color:var(--rose); margin-bottom:8px;">🔍 Sentence-by-Sentence Learning Table</h3>
+                    <div id="reportCorrectionsTable" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let audioCtx, analyser, dataArray, canvas, canvasCtx;
+        let currentAudio = null;
+
+        // 1-on-1 Continuous Call Mode State
+        let isCallMode = false;
+        let callStream = null;
+        let callAudioCtx = null;
+        let callAnalyser = null;
+        let callDataArray = null;
+        let callMediaRecorder = null;
+        let callAudioChunks = [];
+        let isSpeakingDetected = false;
+        let speechStartTime = 0;
+        let silenceStartTime = 0;
+        let isProcessingAudio = false;
+        let isElenaSpeaking = false;
+        const SPEECH_ENERGY_THRESHOLD = 20;
+        const SILENCE_TIMEOUT_MS = 1300; // 1.3s silence triggers auto-send
+        const MIN_SPEECH_DURATION_MS = 600; // at least 0.6s speech
+
+        window.onload = async () => {
+            initVisualizer();
+            loadModels();
+            loadMemory();
+        };
+
+        function initVisualizer() {
+            canvas = document.getElementById('visualizerCanvas');
+            canvasCtx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth * 2;
+            canvas.height = canvas.offsetHeight * 2;
+            drawIdleWave();
+        }
+
+        function drawIdleWave() {
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = isCallMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(99, 102, 241, 0.3)';
+            canvasCtx.beginPath();
+            const sliceWidth = canvas.width / 50;
+            let x = 0;
+            for (let i = 0; i < 50; i++) {
+                const y = canvas.height / 2 + Math.sin(i * 0.3 + Date.now() * 0.003) * (isCallMode ? 6 : 4);
+                if (i === 0) canvasCtx.moveTo(x, y);
+                else canvasCtx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            canvasCtx.stroke();
+            if (!isRecording && !isSpeakingDetected) requestAnimationFrame(drawIdleWave);
+        }
+
+        async function getAudioStream() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                return await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
+            const legacyGetUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+            if (legacyGetUserMedia) {
+                return new Promise((resolve, reject) => {
+                    legacyGetUserMedia.call(navigator, { audio: true }, resolve, reject);
+                });
+            }
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                throw new Error("Microphone is blocked by browser security. Please open http://localhost:8000 or http://127.0.0.1:8000 instead of " + window.location.href);
+            }
+            throw new Error("Microphone API is not supported in this browser context.");
+        }
+
+        // ==========================================
+        // 📞 1-to-1 Continuous Call Mode & VAD
+        // ==========================================
+        async function toggleCallMode() {
+            const callBtn = document.getElementById('callBtn');
+            const callBtnText = document.getElementById('callBtnText');
+            const callBanner = document.getElementById('callBanner');
+            const statusBadge = document.getElementById('statusBadge');
+
+            if (!isCallMode) {
+                try {
+                    callStream = await getAudioStream();
+                    isCallMode = true;
+                    callBtn.classList.add('in-call');
+                    callBtnText.innerText = "End Call";
+                    callBanner.style.display = "flex";
+                    statusBadge.innerText = "🟢 Elena is listening... Speak whenever you're ready!";
+                    statusBadge.style.color = "var(--emerald)";
+
+                    // Setup Call Audio Context & Analyser
+                    callAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = callAudioCtx.createMediaStreamSource(callStream);
+                    callAnalyser = callAudioCtx.createAnalyser();
+                    callAnalyser.fftSize = 256;
+                    source.connect(callAnalyser);
+                    callDataArray = new Uint8Array(callAnalyser.frequencyBinCount);
+
+                    startVadLoop();
+                } catch (err) {
+                    alert("Microphone access error: " + err.message);
+                }
+            } else {
+                stopCallMode();
+            }
+        }
+
+        function stopCallMode() {
+            isCallMode = false;
+            isSpeakingDetected = false;
+            isProcessingAudio = false;
+            isElenaSpeaking = false;
+
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            if (callMediaRecorder && callMediaRecorder.state === "recording") {
+                try { callMediaRecorder.stop(); } catch(e) {}
+            }
+            if (callStream) {
+                callStream.getTracks().forEach(t => t.stop());
+                callStream = null;
+            }
+            if (callAudioCtx) {
+                callAudioCtx.close();
+                callAudioCtx = null;
+            }
+
+            document.getElementById('callBtn').classList.remove('in-call');
+            document.getElementById('callBtnText').innerText = "Start 1-on-1 Call";
+            document.getElementById('callBanner').style.display = "none";
+            document.getElementById('statusBadge').innerText = "Ready to speak";
+            document.getElementById('statusBadge').style.color = "var(--text-muted)";
+            drawIdleWave();
+        }
+
+        function startVadLoop() {
+            if (!isCallMode) return;
+            requestAnimationFrame(startVadLoop);
+
+            if (isProcessingAudio || isElenaSpeaking) {
+                return; // Mute input while Elena is thinking or speaking
+            }
+
+            callAnalyser.getByteFrequencyData(callDataArray);
+            let sum = 0;
+            for (let i = 0; i < callDataArray.length; i++) {
+                sum += callDataArray[i];
+            }
+            const avgEnergy = sum / callDataArray.length;
+
+            const statusBadge = document.getElementById('statusBadge');
+
+            if (avgEnergy > SPEECH_ENERGY_THRESHOLD) {
+                // User is actively speaking
+                silenceStartTime = 0;
+                if (!isSpeakingDetected) {
+                    isSpeakingDetected = true;
+                    speechStartTime = Date.now();
+                    callAudioChunks = [];
+                    callMediaRecorder = new MediaRecorder(callStream);
+                    callMediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) callAudioChunks.push(e.data);
+                    };
+                    callMediaRecorder.onstop = async () => {
+                        if (!isCallMode) return;
+                        const speechDuration = Date.now() - speechStartTime;
+                        if (speechDuration >= MIN_SPEECH_DURATION_MS && callAudioChunks.length > 0) {
+                            const audioBlob = new Blob(callAudioChunks, { type: 'audio/wav' });
+                            await processCallAudio(audioBlob);
+                        } else {
+                            // Reset and listen again if noise blip
+                            isProcessingAudio = false;
+                            isSpeakingDetected = false;
+                            statusBadge.innerText = "🟢 Elena is listening... Speak anytime!";
+                            statusBadge.style.color = "var(--emerald)";
+                        }
+                    };
+                    callMediaRecorder.start();
+                    statusBadge.innerText = "🎙️ Hearing you speak...";
+                    statusBadge.style.color = "var(--rose)";
+                }
+                drawCallActiveWave(callDataArray);
+            } else {
+                // Energy is low / silence
+                if (isSpeakingDetected) {
+                    if (silenceStartTime === 0) {
+                        silenceStartTime = Date.now();
+                    } else if (Date.now() - silenceStartTime > SILENCE_TIMEOUT_MS) {
+                        // Silence detected long enough -> finish utterance & process
+                        isSpeakingDetected = false;
+                        silenceStartTime = 0;
+                        if (callMediaRecorder && callMediaRecorder.state === "recording") {
+                            callMediaRecorder.stop();
+                        }
+                    }
+                } else {
+                    drawIdleWave();
+                }
+            }
+        }
+
+        function drawCallActiveWave(data) {
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            const barWidth = (canvas.width / data.length) * 2.5;
+            let x = 0;
+            for (let i = 0; i < data.length; i++) {
+                const barHeight = (data[i] / 255) * canvas.height * 0.9;
+                const gradient = canvasCtx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#10b981');
+                gradient.addColorStop(1, '#6366f1');
+                canvasCtx.fillStyle = gradient;
+                canvasCtx.fillRect(x, (canvas.height - barHeight) / 2, barWidth - 1, barHeight);
+                x += barWidth;
+            }
+        }
+
+        async function processCallAudio(audioBlob) {
+            isProcessingAudio = true;
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.innerText = "⚡ Elena is thinking...";
+            statusBadge.style.color = "var(--accent)";
+
+            const formData = new FormData();
+            formData.append("audio", audioBlob, "speech.wav");
+            formData.append("topic", document.getElementById('topicSelector').value);
+            formData.append("voice", document.getElementById('voiceSelect').value);
+
+            try {
+                const res = await fetch("/api/chat/audio", { method: "POST", body: formData });
+                const data = await res.json();
+                handleCallTutorResponse(data);
+            } catch (e) {
+                console.error("Call audio error:", e);
+                isProcessingAudio = false;
+                statusBadge.innerText = "🟢 Elena is listening... Speak anytime!";
+                statusBadge.style.color = "var(--emerald)";
+            }
+        }
+
+        function handleCallTutorResponse(data) {
+            const preview = document.getElementById('liveSpeechPreview');
+            const previewText = document.getElementById('liveSpeechText');
+            if (data.user_text) {
+                preview.style.display = "flex";
+                previewText.innerText = `"${data.user_text}"`;
+                appendMessage("user", data.user_text, true);
+            }
+
+            const feedback = data.tutor_feedback;
+            const spoken = feedback.spoken_response;
+            appendMessage("tutor", spoken, false, feedback);
+            updateFeedbackSidebar(feedback);
+
+            // Play Elena's Spoken Audio
+            isElenaSpeaking = true;
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.innerText = "🗣️ Elena is speaking...";
+            statusBadge.style.color = "var(--primary-glow)";
+
+            const voice = document.getElementById('voiceSelect').value;
+            const url = `/api/tts?text=${encodeURIComponent(spoken)}&voice=${encodeURIComponent(voice)}`;
+            
+            if (currentAudio) currentAudio.pause();
+            currentAudio = new Audio(url);
+
+            const onDone = () => {
+                isElenaSpeaking = false;
+                isProcessingAudio = false;
+                if (isCallMode) {
+                    statusBadge.innerText = "🟢 Elena is listening... Speak whenever you're ready!";
+                    statusBadge.style.color = "var(--emerald)";
+                }
+            };
+
+            currentAudio.onended = onDone;
+            currentAudio.onerror = () => {
+                const synth = window.speechSynthesis;
+                const utter = new SpeechSynthesisUtterance(spoken);
+                utter.rate = 0.95;
+                utter.onend = onDone;
+                synth.speak(utter);
+            };
+
+            currentAudio.play().catch(e => {
+                const synth = window.speechSynthesis;
+                const utter = new SpeechSynthesisUtterance(spoken);
+                utter.rate = 0.95;
+                utter.onend = onDone;
+                synth.speak(utter);
+            });
+        }
+
+        function handleTutorResponse(data, appendUser = true) {
+            const preview = document.getElementById('liveSpeechPreview');
+            const previewText = document.getElementById('liveSpeechText');
+            if (appendUser && data.user_text) {
+                preview.style.display = "flex";
+                previewText.innerText = `"${data.user_text}"`;
+                appendMessage("user", data.user_text, true);
+            }
+
+            const feedback = data.tutor_feedback;
+            const spoken = feedback.spoken_response;
+            appendMessage("tutor", spoken, false, feedback);
+
+            // Play TTS
+            playAudio(spoken);
+
+            // Update Feedback Sidebar
+            updateFeedbackSidebar(feedback);
+        }
+
+        function appendMessage(role, text, isVoice = false, feedback = null) {
+            const container = document.getElementById('messagesContainer');
+            const div = document.createElement('div');
+            div.className = `msg ${role}`;
+            
+            let voiceBadge = "";
+            if (role === 'user' && isVoice) {
+                voiceBadge = `<div style="font-size:11px; opacity:0.85; margin-bottom:4px; display:flex; align-items:center; gap:4px; font-weight:600;">🎙️ Extracted Speech:</div>`;
+            }
+
+            const audioBtn = role === 'tutor' 
+                ? `<button class="msg-audio-btn" onclick="playAudio('${escapeQuote(text)}')">🔊</button>` 
+                : '';
+
+            let feedbackHtml = "";
+            if (role === 'tutor' && feedback) {
+                let items = [];
+
+                // 1. Correction
+                if (feedback.has_correction && feedback.original_mistake && feedback.corrected_version) {
+                    const exp = feedback.correction_explanation ? ` <span style="color:#94a3b8; font-size:11.5px;">(${escapeHtml(feedback.correction_explanation)})</span>` : '';
+                    items.push(`
+                        <div style="margin-top:6px; padding:6px 10px; background:rgba(244,63,94,0.12); border-left:3px solid #f43f5e; border-radius:4px; font-size:12.5px; color:#f8fafc; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <span style="color:#fda4af; text-decoration:line-through;">${escapeHtml(feedback.original_mistake)}</span> ➔ <span style="color:#6ee7b7; font-weight:600;">${escapeHtml(feedback.corrected_version)}</span>${exp}
+                            </div>
+                            <button class="msg-audio-btn" style="width:22px; height:22px; font-size:11px;" onclick="playAudio('${escapeQuote(feedback.corrected_version)}')">🔊</button>
+                        </div>
+                    `);
+                }
+
+                // 2. Improvement points
+                if (feedback.improvement_points && Array.isArray(feedback.improvement_points) && feedback.improvement_points.length > 0) {
+                    const pts = feedback.improvement_points.map(p => `<li style="margin-bottom:3px;">${escapeHtml(p)}</li>`).join("");
+                    items.push(`
+                        <div style="margin-top:6px; padding:6px 10px; background:rgba(16,185,129,0.1); border-left:3px solid #10b981; border-radius:4px; font-size:12px; color:#cbd5e1;">
+                            <strong style="color:#6ee7b7; font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px;">Improvement Points:</strong>
+                            <ul style="margin:4px 0 0 16px; padding:0;">${pts}</ul>
+                        </div>
+                    `);
+                }
+
+                // 3. Better phrasing
+                if (feedback.better_phrasing) {
+                    items.push(`
+                        <div style="margin-top:6px; padding:6px 10px; background:rgba(6,182,212,0.1); border-left:3px solid #06b6d4; border-radius:4px; font-size:12px; color:#e0f2fe; display:flex; justify-content:space-between; align-items:center;">
+                            <div><strong style="color:#38bdf8; font-size:11.5px;">💡 Native Phrasing:</strong> "${escapeHtml(feedback.better_phrasing)}"</div>
+                            <button class="msg-audio-btn" style="width:22px; height:22px; font-size:11px;" onclick="playAudio('${escapeQuote(feedback.better_phrasing)}')">🔊</button>
+                        </div>
+                    `);
+                }
+
+                if (items.length > 0) {
+                    feedbackHtml = `
+                        <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
+                            ${items.join("")}
+                        </div>
+                    `;
+                }
+            }
+
+            div.innerHTML = `<div class="msg-bubble">${voiceBadge}${escapeHtml(text)} ${audioBtn}${feedbackHtml}</div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function playAudio(text) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            const voice = document.getElementById('voiceSelect').value;
+            const url = `/api/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`;
+            currentAudio = new Audio(url);
+            currentAudio.play().catch(e => {
+                const synth = window.speechSynthesis;
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = 0.95;
+                synth.speak(utter);
+            });
+        }
+
+        function updateFeedbackSidebar(fb) {
+            document.getElementById('emptyFeedbackState').style.display = 'none';
+
+            // Improvement Points
+            const ptsSection = document.getElementById('improvementPointsSection');
+            const ptsList = document.getElementById('improvementPointsList');
+            if (fb.improvement_points && Array.isArray(fb.improvement_points) && fb.improvement_points.length > 0) {
+                ptsSection.style.display = 'block';
+                ptsList.innerHTML = fb.improvement_points.map(pt => 
+                    `<div style="background:rgba(16,185,129,0.08); border-left:3px solid var(--emerald); padding:8px 12px; border-radius:6px; font-size:13px; color:#e2e8f0; line-height:1.4;">${escapeHtml(pt)}</div>`
+                ).join("");
+            } else {
+                ptsSection.style.display = 'none';
+            }
+
+            // Recast / Mistake
+            if (fb.has_correction && fb.original_mistake && fb.corrected_version) {
+                document.getElementById('recastSection').style.display = 'block';
+                document.getElementById('recastOriginal').innerText = `"${fb.original_mistake}"`;
+                document.getElementById('recastCorrected').innerHTML = `✓ "${fb.corrected_version}" <button class="msg-audio-btn" style="width:22px; height:22px; font-size:11px;" onclick="playAudio('${escapeQuote(fb.corrected_version)}')">🔊</button>`;
+                document.getElementById('recastExp').innerText = fb.correction_explanation || "";
+            } else {
+                document.getElementById('recastSection').style.display = 'none';
+            }
+
+            // Better phrasing
+            if (fb.better_phrasing) {
+                document.getElementById('phrasingSection').style.display = 'block';
+                document.getElementById('phrasingContent').innerHTML = `"${escapeHtml(fb.better_phrasing)}" <button class="msg-audio-btn" style="width:22px; height:22px; font-size:11px;" onclick="playAudio('${escapeQuote(fb.better_phrasing)}')">🔊</button>`;
+            } else {
+                document.getElementById('phrasingSection').style.display = 'none';
+            }
+
+            // Vocabulary
+            if (fb.new_vocabulary && fb.new_vocabulary.word_or_idiom) {
+                document.getElementById('vocabSection').style.display = 'block';
+                document.getElementById('vocabWord').innerText = fb.new_vocabulary.word_or_idiom;
+                document.getElementById('vocabDef').innerText = fb.new_vocabulary.definition;
+                document.getElementById('vocabEx').innerText = `"${fb.new_vocabulary.example}"`;
+            } else {
+                document.getElementById('vocabSection').style.display = 'none';
+            }
+
+            // Fluency tip
+            if (fb.fluency_tip) {
+                document.getElementById('fluencyTipSection').style.display = 'block';
+                document.getElementById('fluencyTipText').innerText = fb.fluency_tip;
+            } else {
+                document.getElementById('fluencyTipSection').style.display = 'none';
+            }
+
+            // Live update mistakes list on main page
+            loadMemory();
+        }
+
+        async function loadModels() {
+            try {
+                const res = await fetch("/api/models");
+                const data = await res.json();
+                const sel = document.getElementById('modelSelect');
+                sel.innerHTML = "";
+                data.models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.innerText = m;
+                    if (m === data.current) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            } catch (e) {}
+        }
+
+        async function onModelChange() {
+            const model = document.getElementById('modelSelect').value;
+            const form = new FormData();
+            form.append("model_name", model);
+            await fetch("/api/model/select", { method: "POST", body: form });
+        }
+
+        async function loadMemory() {
+            try {
+                const res = await fetch("/api/memory");
+                const data = await res.json();
+                if (data.profile) {
+                    if (data.profile.proficiency_level) document.getElementById('profLevel').value = data.profile.proficiency_level;
+                    if (data.profile.learning_goal) document.getElementById('learningGoal').value = data.profile.learning_goal;
+                    if (data.profile.interests) document.getElementById('interests').value = data.profile.interests;
+                }
+
+                // Render Main Page Mistakes List
+                const mainMistakes = document.getElementById('mainMistakesList');
+                const countBadge = document.getElementById('mistakeCountBadge');
+                if (data.mistakes && data.mistakes.length > 0) {
+                    countBadge.innerText = `${data.mistakes.length} tracked`;
+                    mainMistakes.innerHTML = data.mistakes.map(m => `
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(244,63,94,0.2); border-radius:8px; padding:8px 10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px;">
+                                <div>
+                                    <span style="color:#fda4af; text-decoration:line-through; font-size:12px;">${escapeHtml(m.original)}</span> ➔ 
+                                    <span style="color:#6ee7b7; font-weight:600; font-size:13px;">${escapeHtml(m.corrected)}</span>
+                                </div>
+                                <button class="msg-audio-btn" style="width:22px; height:22px; font-size:11px; flex-shrink:0;" onclick="playAudio('${escapeQuote(m.corrected)}')">🔊</button>
+                            </div>
+                            ${m.explanation ? `<div style="color:var(--text-muted); font-size:11.5px; margin-top:3px;">${escapeHtml(m.explanation)}</div>` : ''}
+                        </div>
+                    `).join("");
+                } else {
+                    countBadge.innerText = "0 tracked";
+                    mainMistakes.innerHTML = `<div style="color:var(--text-muted); text-align:center; padding:12px 0;">No mistakes recorded yet. Keep speaking!</div>`;
+                }
+
+                // Render Vocab in Modal
+                const vocabContainer = document.getElementById('memoryVocabList');
+                vocabContainer.innerHTML = data.vocabulary.map(v => 
+                    `<div style="padding:4px 0;"><strong>${v.word}</strong>: ${v.definition} (Practiced ${v.practiced}x)</div>`
+                ).join("") || "<div style='color:gray;'>No vocabulary tracked yet.</div>";
+
+                // Render Mistakes in Modal
+                const mistakeContainer = document.getElementById('memoryMistakesList');
+                mistakeContainer.innerHTML = data.mistakes.map(m => 
+                    `<div style="padding:4px 0; color:#fda4af;">&bull; <s>${m.original}</s> &rarr; <span style="color:#6ee7b7;">${m.corrected}</span> (${m.explanation})</div>`
+                ).join("") || "<div style='color:gray;'>No recurring mistakes recorded!</div>";
+            } catch (e) {}
+        }
+
+        function openMemoryModal() {
+            loadMemory();
+            document.getElementById('memoryModal').classList.add('open');
+        }
+
+        function closeMemoryModal() {
+            document.getElementById('memoryModal').classList.remove('open');
+        }
+
+        async function saveProfile(e) {
+            e.preventDefault();
+            const form = new FormData();
+            form.append("level", document.getElementById('profLevel').value);
+            form.append("goal", document.getElementById('learningGoal').value);
+            form.append("interests", document.getElementById('interests').value);
+            await fetch("/api/memory/profile", { method: "POST", body: form });
+            closeMemoryModal();
+        }
+
+        function onTopicChange() {
+            const topic = document.getElementById('topicSelector').value;
+            appendMessage("tutor", `Great! We've switched our focus to: **${topic}**. Tell me your thoughts or practice scenario!`);
+        }
+
+        // Session Evaluation & PDF Report Logic
+        async function openReportModal() {
+            const modal = document.getElementById('reportModal');
+            const loading = document.getElementById('reportLoading');
+            const body = document.getElementById('reportBody');
+            
+            modal.classList.add('open');
+            loading.style.display = 'flex';
+            body.style.display = 'none';
+
+            try {
+                const res = await fetch("/api/session/analyze");
+                const data = await res.json();
+
+                // Populate Scores
+                const scores = data.scores || {};
+                document.getElementById('reportScore').innerText = data.overall_score || 82;
+                document.getElementById('reportCefr').innerText = data.cefr_level || "B2 (Upper Intermediate)";
+                document.getElementById('reportGrammar').innerText = `${scores.grammar_accuracy || data.grammar_score || 78}%`;
+                document.getElementById('reportVocab').innerText = `${scores.vocabulary_range || data.vocabulary_score || 82}%`;
+                document.getElementById('reportFluency').innerText = `${scores.fluency_and_flow || data.fluency_score || 84}%`;
+                document.getElementById('reportClarity').innerText = `${scores.clarity_and_pronunciation || data.clarity_score || 83}%`;
+
+                // Executive Summary
+                document.getElementById('reportSummary').innerText = data.executive_summary || "Great effort in today's speaking session! Keep practicing regularly to build fluency and natural phrasing.";
+
+                // Strengths List
+                const strengthsList = document.getElementById('reportStrengthsList');
+                const strengths = data.strengths || [];
+                if (strengths.length > 0) {
+                    strengthsList.innerHTML = strengths.map(s => `<li>${escapeHtml(s)}</li>`).join("");
+                } else {
+                    strengthsList.innerHTML = `<li>Communicated ideas clearly with great motivation.</li>`;
+                }
+
+                // Improvements List
+                const improvementsList = document.getElementById('reportImprovementsList');
+                const improvements = data.key_improvements || data.priority_improvements || [];
+                if (improvements.length > 0) {
+                    improvementsList.innerHTML = improvements.map(i => `<li>${escapeHtml(i)}</li>`).join("");
+                } else {
+                    improvementsList.innerHTML = `<li>Continue practicing past tense structures and preposition usage.</li>`;
+                }
+
+                // Sentence Corrections Table
+                const correctionsTable = document.getElementById('reportCorrectionsTable');
+                const corrections = data.detailed_corrections || data.sentence_corrections || [];
+                if (corrections.length > 0) {
+                    correctionsTable.innerHTML = corrections.map(c => {
+                        const orig = c.original || c.original_spoken || "";
+                        const corr = c.corrected || c.natural_english || "";
+                        const exp = c.explanation || c.rule_explanation || "";
+                        return `
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(244,63,94,0.2); border-radius:8px; padding:10px 12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <div style="flex:1;">
+                                    <div style="color:#fda4af; text-decoration:line-through; font-size:12.5px; margin-bottom:3px;">
+                                        ❌ "${escapeHtml(orig)}"
+                                    </div>
+                                    <div style="color:#6ee7b7; font-weight:600; font-size:13.5px; display:flex; align-items:center; gap:6px;">
+                                        ✅ "${escapeHtml(corr)}"
+                                        <button class="msg-audio-btn" style="width:22px; height:22px; font-size:11px;" onclick="playAudio('${escapeQuote(corr)}')">🔊</button>
+                                    </div>
+                                </div>
+                            </div>
+                            ${exp ? `<div style="color:var(--text-muted); font-size:11.5px; margin-top:5px; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px;">
+                                💡 <strong>Why:</strong> ${escapeHtml(exp)}
+                            </div>` : ''}
+                        </div>`;
+                    }).join("");
+                } else {
+                    correctionsTable.innerHTML = `<div style="color:var(--text-muted); text-align:center; padding:12px 0;">No grammatical errors detected in this session! Excellent work!</div>`;
+                }
+
+                loading.style.display = 'none';
+                body.style.display = 'flex';
+
+            } catch (err) {
+                console.error("Failed to fetch session analysis:", err);
+                loading.innerHTML = `<p style="color:#f43f5e;">Failed to load evaluation analysis. Please try again.</p>`;
+            }
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('open');
+        }
+
+        function downloadReportPDF() {
+            window.open('/api/session/report/pdf', '_blank');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function escapeQuote(text) {
+            return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
