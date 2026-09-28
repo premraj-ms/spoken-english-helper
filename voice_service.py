@@ -13,9 +13,14 @@ def get_whisper_model(model_name: str = "base.en"):
     global _whisper_model
     if _whisper_model is None:
         from faster_whisper import WhisperModel
-        print(f"[STT] Loading lightweight faster-whisper ({model_name})...")
-        _whisper_model = WhisperModel(model_name, device="cpu", compute_type="int8", cpu_threads=2, num_workers=1)
-        print("[STT] Faster-whisper ready.")
+        import torch
+        
+        has_cuda = torch.cuda.is_available()
+        device = "cuda" if has_cuda else "cpu"
+        compute_type = "float16" if has_cuda else "int8"
+        print(f"[STT] Loading faster-whisper ({model_name}) on device={device} ({compute_type})...")
+        _whisper_model = WhisperModel(model_name, device=device, compute_type=compute_type, num_workers=1)
+        print("[STT] Faster-whisper ready on", device)
     return _whisper_model
 
 def transcribe_audio_file(audio_path_or_bytes) -> str:
